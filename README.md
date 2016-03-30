@@ -3,7 +3,7 @@ Query DNS servers every x seconds and report failures to Datadog
 
 # Docker
 To run in Docker you must set the following environment variables:
-* DD_API_KEY - your Datadog API key
+* DATADOG_HOST - your Datadog collector hostname
 * DNS_NAME - known DNS name to lookup
 * DNS_IP - IP address of the DNS name
 * DNS_SERVERS - comma-separated list of DNS servers to monitor
