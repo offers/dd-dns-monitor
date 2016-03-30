@@ -37,15 +37,8 @@ func dnsCheck(name, ip, server string) (error, time.Duration) {
 	return nil, t
 }
 
-func monitor(name, ip string, servers []string, interval time.Duration) {
+func monitor(dd *statsd.Client, name, ip string, servers []string, interval time.Duration) {
 	log.Printf("Monitoring...")
-
-	namespace := "dd-dns-monitor"
-	dd, err := statsd.New("127.0.0.1:8125")
-	if err != nil {
-		log.Fatal(err)
-	}
-	dd.Namespace = namespace + "."
 
 	ticker := time.NewTicker(interval)
 	for {
@@ -71,7 +64,7 @@ func main() {
 	app.Usage = "log DNS server failures to DataDog"
 	app.Author = "Chris Kite"
 
-	var name, ip, servers string
+	var name, ip, servers, datadogHost string
 	var interval time.Duration
 
 	app.Flags = []cli.Flag{
@@ -93,6 +86,12 @@ func main() {
 			EnvVar:      "DNS_SERVERS",
 			Destination: &servers,
 		},
+		cli.StringFlag{
+			Name:        "datadog, d",
+			Usage:       "Datadog collector host",
+			EnvVar:      "DATADOG_HOST",
+			Destination: &datadogHost,
+		},
 		cli.DurationFlag{
 			Name:        "interval, t",
 			Usage:       "interval in seconds to check at",
@@ -103,12 +102,20 @@ func main() {
 	}
 
 	app.Action = func(c *cli.Context) {
-		if "" == name || "" == ip || "" == servers {
+		if "" == name || "" == ip || "" == servers || "" == datadogHost {
 			cli.ShowAppHelp(c)
 			return
 		}
+
+		namespace := "dd_dns_monitor"
+		dd, err := statsd.New(datadogHost + ":8125")
+		if err != nil {
+			log.Fatal(err)
+		}
+		dd.Namespace = namespace + "."
+
 		servers := strings.Split(c.String("servers"), ",")
-		monitor(name, ip, servers, interval*time.Second)
+		monitor(dd, name, ip, servers, interval*time.Second)
 	}
 
 	app.Run(os.Args)
