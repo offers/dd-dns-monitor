@@ -48,7 +48,7 @@ func monitor(dd *statsd.Client, name, ip string, servers []string, interval time
 				tag := []string{server}
 				err, t := dnsCheck(name, ip, server)
 				if err != nil {
-					log.Printf(err.Error()) //TODO change to debug
+					log.Printf("DNS Check Error: %v", err.Error())
 					dd.Count("error", 1, tag, 1)
 				} else {
 					dd.TimeInMilliseconds("time", float64(t/time.Millisecond), tag, 1)
