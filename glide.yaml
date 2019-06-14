@@ -1,5 +1,0 @@
-package: github.com/chriskite/dd-dns-monitor
-import:
-- package: github.com/miekg/dns
-- package: github.com/DataDog/datadog-go
-- package: github.com/codegangsta/cli
